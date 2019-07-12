@@ -1,22 +1,23 @@
-package myflink.keyedstate;
+package myflink.app;
 
+import myflink.keyedstate.PvUvProcessFunction;
+import myflink.model.OptLog;
+import myflink.water.TimeLagWaterMarkGen;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +28,8 @@ public class TestKeyedState {
         StreamExecutionEnvironment env=StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setParallelism(1);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+
 
 
         env.enableCheckpointing(5000);
@@ -64,13 +67,11 @@ public class TestKeyedState {
 //                .print();
 
 
-//        env.fromElements(Tuple2.of(1D, 3D), Tuple2.of(1D, 5D), Tuple2.of(1D, 7D), Tuple2.of(1D, 4D), Tuple2.of(1D, 2D))
-//                .keyBy(0)
-//                .flatMap(new CountWindowAverage())
-//                .print();
 
 
-//        env.fromElements(Tuple2.of(1L, 3L), Tuple2.of(1L, 5L), Tuple2.of(1L, 7L), Tuple2.of(1L, 4L), Tuple2.of(1L, 2L))
+
+//        env.fromElements(Tuple2.of(1L, 3L), Tuple2.of(1L, 5L), Tuple2.of(1L, 7L), Tuple2.of(1L, 4L), Tuple2.of(1L, 2L),
+//                Tuple2.of(2L, 3L), Tuple2.of(2L, 5L), Tuple2.of(3L, 7L),Tuple2.of(3L, 6L), Tuple2.of(4L, 5L))
 //                .keyBy(0)
 //                .flatMap(new CountWindowAverage())
 //                .print();
@@ -86,109 +87,29 @@ public class TestKeyedState {
 //                .print();
 
 
-
         DataStream<OptLog> inputStream = env.addSource(new SimpleSourceFunction())
-                .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<OptLog>() {
-
-                    @Override
-                    public long extractAscendingTimestamp(OptLog element) {
-                        return element.opTs;
-                    }
-                }).setParallelism(1);
+                .assignTimestampsAndWatermarks(new TimeLagWaterMarkGen()).setParallelism(1);
 
 
         inputStream.print();
 
         //每个key一个状态，求pageName的uv
-
-        inputStream
+        DataStream<Tuple3<String, Long,Long>>  res = inputStream
                 .keyBy(new KeySelector<OptLog, String>() {
                     @Override
                     public String getKey(OptLog optLog) throws Exception {
                         return optLog.getPageName();
                     }
                 })
-//                .window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(5)))
-                .flatMap(new PageKeyedState())
-                .print();
+                //windowassigner的分类，有了windowassigner才有各种个样的window
+                .window(TumblingEventTimeWindows.of(Time.seconds(5)))
+                .process(new PvUvProcessFunction());
 
+//                .flatMap(new PageNameUVState())
+//                .print();
+
+        res.print();
         env.execute();
-    }
-
-
-    /**
-     * 操作日志
-     */
-    public static class OptLog{
-        /**
-         * 用户名
-         */
-        private String userName;
-
-        @Override
-        public String toString() {
-            return "OptLog{" +
-                    "userName='" + userName + '\'' +
-                    ", opType=" + opType +
-                    ", opTs=" + opTs +
-                    ", pageName='" + pageName + '\'' +
-                    '}';
-        }
-
-        /**
-         * 操作类型
-         */
-        private int opType;
-        /**
-         * 时间戳
-         */
-        private long opTs;
-
-        public String getPageName() {
-            return pageName;
-        }
-
-        public void setPageName(String pageName) {
-            this.pageName = pageName;
-        }
-
-        private String pageName;
-
-        public OptLog(String userName, int opType, long opTsm, String pageName) {
-            this.userName = userName;
-            this.opType = opType;
-            this.opTs = opTsm;
-            this.pageName = pageName;
-        }
-
-        public static OptLog of(String userName, int opType, long opTs, String pageName){
-            return new OptLog(userName,opType,opTs, pageName);
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public int getOpType() {
-            return opType;
-        }
-
-        public void setOpType(int opType) {
-            this.opType = opType;
-        }
-
-        public long getOpTs() {
-            return opTs;
-        }
-
-        public void setOpTs(long opTs) {
-            this.opTs = opTs;
-        }
-
     }
 
 
@@ -259,7 +180,7 @@ public class TestKeyedState {
                 Long randomNum= new Double((int)(5+Math.random()*(5-1+1))).longValue();
                 Long randomPage = new Double((int)(Math.random() * (18 -1 + 1) + 5)).longValue();
                 sourceContext.collect(new Tuple2<Long, Long>(random, page));
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
         }
         @Override

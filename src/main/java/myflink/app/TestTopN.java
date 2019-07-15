@@ -1,9 +1,11 @@
 package myflink.app;
 
 import myflink.keyedstate.PvUvProcessFunction;
+import myflink.keyedstate.SpecialEleProcess;
 import myflink.keyedstate.TopNFunction;
 import myflink.model.OptLog;
 import myflink.water.WaterMaskExt;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -14,6 +16,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -21,7 +24,10 @@ import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeW
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,50 +65,91 @@ public class TestTopN {
 
 
 
-        DataStream<OptLog> inputStream = env.addSource(new SimpleSourceFunction())
+        SplitStream<OptLog> splitStream = env.addSource(new SimpleSourceFunction())
                 .assignTimestampsAndWatermarks(new WaterMaskExt()).setParallelism(1)
                 .split(new OutputSelector<OptLog>() {
-
                     @Override
                     public Iterable<String> select(OptLog value) {
-                        return null;
+                        List<String> output = new ArrayList<String>();
+
+                        if ("首页".equalsIgnoreCase(value.getPageName())) {
+                            output.add("special");
+                        }
+                        else {
+                            output.add("normal");
+                        }
+                        return output;
                     }
                 });
 
 
-        inputStream.print();
+        DataStream<OptLog> normal = splitStream.select("normal");
+
+        DataStream<OptLog> special = splitStream.select("special");
+
+//        DataStream<OptLog> all = splitStream.select("even","odd");
+
+//        inputStream.print();
 
         //每个key一个状态，求pageName的uv
 
 
         //每个key一个状态，求pageName的uv
-        DataStream<Tuple3<String, Long,Long>>  res = inputStream
+        DataStream<Tuple3<String, Long,Long>>  specailRes = special
                 .keyBy(new KeySelector<OptLog, String>() {
                     @Override
                     public String getKey(OptLog optLog) throws Exception {
-                        return optLog.getPageName();
+                        return  (int) (Math.random() * (100 -1 + 1) + 1) + "_" + optLog.getPageName();
                     }
                 })
-                //windowassigner的分类，有了windowassigner才有各种个样的window
-                .window(SlidingProcessingTimeWindows.of(Time.seconds(100),Time.seconds(20)))
+                //windowassigner的分类，有了windowassigner才有各种个样的window,topN是滑动窗口
+                .timeWindow((Time.seconds(100)),Time.seconds(20))
                 .process(new PvUvProcessFunction());
 
-        res.print();
+        specailRes.print();
+
+        DataStream<Tuple3<String, Long,Long>>  normalRes = normal
+                .keyBy(new KeySelector<OptLog, String>() {
+                    @Override
+                    public String getKey(OptLog optLog) throws Exception {
+                        return  optLog.getPageName();
+                    }
+                })
+                //windowassigner的分类，有了windowassigner才有各种个样的window,topN是滑动窗口
+                .timeWindow((Time.seconds(100)),Time.seconds(20))
+                .process(new PvUvProcessFunction());
+
+        normalRes.print();
 
 
+        DataStream<Tuple3<String, Long,Long>>  specialTmp = specailRes
+                .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20)))
+                .process(new SpecialEleProcess());
 
+        specailRes.print();
 
-        System.out.println("************start topN ******************");
-
-        /***************topN代码*********************/
+//        System.out.println("************start topN ******************");
+//
+//        /***************topN代码*********************/
         DataStream<Tuple3<String, Long,Long>>
-                topNRes = res
+                topNRes = normalRes
                 .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20)))
                 //所有key元素进入一个20s长的窗口（选20秒是因为上游窗口每20s计算一轮数据，topN窗口一次计算只统计一个窗口时间内的变化）
-                .process(new TopNFunction(5));//计算该窗口TopN
+                .process(new TopNFunction(5)).union(specailRes);//计算该窗口TopN
 
+
+
+        topNRes.map(new MapFunction<Tuple3<String,Long,Long>, Object>() {
+            @Override
+            public Object map(Tuple3<String, Long, Long> value) {
+                System.out.println("topN result datastream is :"  + value);
+
+                return value;
+            }
+        });
+//
         topNRes.print();
-//        res.print();
+////        res.print();
         env.execute();
     }
 

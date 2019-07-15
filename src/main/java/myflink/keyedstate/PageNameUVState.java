@@ -78,7 +78,6 @@ public class PageNameUVState extends RichFlatMapFunction<OptLog, Tuple3<String, 
         /**
          * 注意这里仅仅用了状态，但是没有利用状态来容错
          */
-//        hashmap = new HashMap<>();
         ListStateDescriptor<Tuple2<String, Long>> listStateDescriptor=
                 new ListStateDescriptor<>("uv",
                         TypeInformation.of(new TypeHint<Tuple2<String, Long>>() {}));

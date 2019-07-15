@@ -94,6 +94,7 @@ public class TestKeyedState {
         inputStream.print();
 
         //每个key一个状态，求pageName的uv
+        //实时的PV，UV是滚动窗口
         DataStream<Tuple3<String, Long,Long>>  res = inputStream
                 .keyBy(new KeySelector<OptLog, String>() {
                     @Override

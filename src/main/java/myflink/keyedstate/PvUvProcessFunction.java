@@ -1,6 +1,5 @@
 package myflink.keyedstate;
 
-import myflink.app.TestKeyedState;
 import myflink.model.OptLog;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;

@@ -4,8 +4,12 @@ package myflink.model;
  * Created by xumingyang on 2019/7/12.
  */
 public class OptLog {
-        /**
+    public OptLog() {
+    }
+
+    /**
  * 用户名
+
  */
 private String userName;
 

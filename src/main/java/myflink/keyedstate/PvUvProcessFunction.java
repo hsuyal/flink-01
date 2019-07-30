@@ -50,7 +50,7 @@ public class PvUvProcessFunction  extends ProcessWindowFunction<OptLog, Tuple3<S
 
 
         System.out.println("*****************PvUvProcessFunction window start*********key is: " + s +
-                "    window size is :" + context.git window().getStart() + "-------" + context.window().getEnd());
+                "    window size is :" + context.window().getStart() + "-------" + context.window().getEnd());
         java.util.Map<String, Long> map  = new java.util.HashMap<>() ;
 
 

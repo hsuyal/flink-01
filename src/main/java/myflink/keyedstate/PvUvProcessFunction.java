@@ -46,8 +46,11 @@ public class PvUvProcessFunction  extends ProcessWindowFunction<OptLog, Tuple3<S
     public void process(String s, Context context, Iterable<OptLog> elements, Collector<Tuple3<String, Long, Long>> out)
             throws Exception {
 
+//        getRuntimeContext().getMetricGroup().gauge("")
+
+
         System.out.println("*****************PvUvProcessFunction window start*********key is: " + s +
-                "    window size is :" + context.window().getStart() + "-------" + context.window().getEnd());
+                "    window size is :" + context.git window().getStart() + "-------" + context.window().getEnd());
         java.util.Map<String, Long> map  = new java.util.HashMap<>() ;
 
 

@@ -5,6 +5,7 @@ import myflink.keyedstate.SpecialEleProcess;
 import myflink.keyedstate.TopNFunction;
 import myflink.model.OptLog;
 import myflink.water.WaterMaskExt;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -20,14 +21,12 @@ import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -95,18 +94,18 @@ public class TestTopN {
 
 
         //每个key一个状态，求pageName的uv
-        DataStream<Tuple3<String, Long,Long>>  specailRes = special
-                .keyBy(new KeySelector<OptLog, String>() {
-                    @Override
-                    public String getKey(OptLog optLog) throws Exception {
-                        return  (int) (Math.random() * (100 -1 + 1) + 1) + "_" + optLog.getPageName();
-                    }
-                })
-                //windowassigner的分类，有了windowassigner才有各种个样的window,topN是滑动窗口
-                .timeWindow((Time.seconds(100)),Time.seconds(20))
-                .process(new PvUvProcessFunction());
-
-        specailRes.print();
+//        DataStream<Tuple3<String, Long,Long>>  specailRes = special
+//                .keyBy(new KeySelector<OptLog, String>() {
+//                    @Override
+//                    public String getKey(OptLog optLog) throws Exception {
+//                        return  (int) (Math.random() * (100 -1 + 1) + 1) + "_" + optLog.getPageName();
+//                    }
+//                })
+//                //windowassigner的分类，有了windowassigner才有各种个样的window,topN是滑动窗口
+//                .timeWindow((Time.minutes(30)),Time.seconds(5))
+//                .process(new PvUvProcessFunction());
+//
+//        specailRes.print();
 
         DataStream<Tuple3<String, Long,Long>>  normalRes = normal
                 .keyBy(new KeySelector<OptLog, String>() {
@@ -116,26 +115,26 @@ public class TestTopN {
                     }
                 })
                 //windowassigner的分类，有了windowassigner才有各种个样的window,topN是滑动窗口
-                .timeWindow((Time.seconds(100)),Time.seconds(20))
+                .timeWindow((Time.minutes(5)),Time.minutes(5))
                 .process(new PvUvProcessFunction());
 
         normalRes.print();
 
 
-        DataStream<Tuple3<String, Long,Long>>  specialTmp = specailRes
-                .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20)))
-                .process(new SpecialEleProcess());
-
-        specailRes.print();
+//        DataStream<Tuple3<String, Long,Long>>  specialTmp = specailRes
+//                .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20)))
+//                .process(new SpecialEleProcess());
+//
+//        specailRes.print();
 
 //        System.out.println("************start topN ******************");
 //
 //        /***************topN代码*********************/
         DataStream<Tuple3<String, Long,Long>>
                 topNRes = normalRes
-                .windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20)))
+                .windowAll(TumblingProcessingTimeWindows.of(Time.minutes(5)))
                 //所有key元素进入一个20s长的窗口（选20秒是因为上游窗口每20s计算一轮数据，topN窗口一次计算只统计一个窗口时间内的变化）
-                .process(new TopNFunction(5)).union(specailRes);//计算该窗口TopN
+                .process(new TopNFunction(20));//计算该窗口TopN
 
 
 
@@ -166,23 +165,7 @@ public class TestTopN {
 
     public static final String[] pageNameArray = new String[] {
             "首页",
-            "课程详情页面",
-            "类目页面",
-            "我的学习",
-            "我的",
-            "设置",
-            "学习中心",
-            "推荐",
-            "主类目",
-            "搜索",
-            "搜索结果",
-            "课时",
-            "登陆",
-            "注册",
-            "订单",
-            "支付页面",
-            "支付成功",
-            "H5页面"
+            "课程详情页面"
     };
 
     private static class SimpleSourceFunction implements SourceFunction<OptLog> {
@@ -192,10 +175,28 @@ public class TestTopN {
         public void run(SourceContext<OptLog> sourceContext) throws Exception {
             while (isRunning) {
                 int randomNum=(int)(1+Math.random()*(5-1+1));
-                int randomPage = (int) (Math.random() * (18 -1 + 1) + 1);
-                sourceContext.collect(OptLog.of(nameArray[randomNum-1],randomNum, new Date().getTime(), pageNameArray[randomPage-1]));
+                int randomPage = (int) (Math.random() * (2 -1 + 1) + 1);
+                int randomSeq = (int) (Math.random() * (100000 -1 + 1) + 1);
+                sourceContext.collect(OptLog.of(nameArray[randomNum-1]+randomSeq,randomNum, new Date().getTime(),
+                        "首页",
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1],
+                        pageNameArray[randomPage-1]
+                ));
                 num++;
-                Thread.sleep(1000);
+                Thread.sleep(1);
             }
         }
         @Override
@@ -220,7 +221,7 @@ public class TestTopN {
                 Long randomNum= new Double((int)(5+Math.random()*(5-1+1))).longValue();
                 Long randomPage = new Double((int)(Math.random() * (18 -1 + 1) + 5)).longValue();
                 sourceContext.collect(new Tuple2<Long, Long>(random, page));
-                Thread.sleep(100);
+                Thread.sleep(0);
             }
         }
         @Override

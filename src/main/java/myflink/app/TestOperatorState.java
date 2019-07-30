@@ -14,7 +14,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Author: 🐟lifei🐟
  * @Date: 2019/1/21 下午6:53
  */
 public class TestOperatorState {

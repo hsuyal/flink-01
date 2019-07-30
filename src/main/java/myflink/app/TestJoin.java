@@ -16,6 +16,9 @@ import org.apache.flink.streaming.api.windowing.triggers.CountTrigger;
 public class TestJoin {
 
     public static void main(String[] args) throws Exception {
+
+
+
         /**
          * 1、创建一个socket stream。本机9000端口。输入的字符串以空格为界分割成Array[String]。然后再取出其中前两个元素组成(String, String)类型的tuple。
          * 2、join条件为两个流中的数据((String, String)类型)第一个元素相同。

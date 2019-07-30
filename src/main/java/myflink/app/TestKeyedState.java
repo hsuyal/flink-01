@@ -87,7 +87,7 @@ public class TestKeyedState {
 //                .print();
 
 
-        DataStream<OptLog> inputStream = env.addSource(new SimpleSourceFunction())
+        DataStream<OptLog> inputStream = env.addSource(new SimpleSourceFunction()).uid("keystaete")
                 .assignTimestampsAndWatermarks(new TimeLagWaterMarkGen()).setParallelism(1);
 
 
@@ -104,7 +104,7 @@ public class TestKeyedState {
                 })
                 //windowassigner的分类，有了windowassigner才有各种个样的window
                 .window(TumblingEventTimeWindows.of(Time.seconds(5)))
-                .process(new PvUvProcessFunction());
+                .process(new PvUvProcessFunction()).uid("process");
 
 //                .flatMap(new PageNameUVState())
 //                .print();
@@ -154,7 +154,7 @@ public class TestKeyedState {
 //               int random  = 1;
                 int randomNum=(int)(1+Math.random()*(5-1+1));
                 int randomPage = (int) (Math.random() * (18 -1 + 1) + 1);
-                sourceContext.collect(OptLog.of(nameArray[randomNum-1],randomNum, new Date().getTime(), pageNameArray[randomPage-1]));
+//                sourceContext.collect(OptLog.of(nameArray[randomNum-1],randomNum, new Date().getTime(), pageNameArray[randomPage-1]));
                 num++;
                 Thread.sleep(1000);
             }

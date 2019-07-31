@@ -1,11 +1,25 @@
 package myflink.model;
 
+import org.apache.flink.table.shaded.org.joda.time.DateTime;
+
+import java.sql.Timestamp;
+
 /**
  * Created by xumingyang on 2019/7/12.
  */
 public class OptLog {
     public OptLog() {
     }
+
+    public Timestamp getEventTime() {
+        return eventTime;
+    }
+
+    public void setEventTime(Timestamp eventTime) {
+        this.eventTime = eventTime;
+    }
+
+    private Timestamp eventTime;
 
     /**
  * 用户名
@@ -217,6 +231,19 @@ private String userName;
         this.pageName14 = pageName0;
     }
 
+    public OptLog(String userName, int opType, Timestamp dt, String pageName) {
+        this.userName = userName;
+        this.opType = opType;
+        this.eventTime = dt;
+        this.pageName = pageName;
+    }
+
+
+    public static OptLog of(String userName, int opType, Timestamp dt, String pageName){
+
+        return new OptLog(userName, opType, dt, pageName);
+
+    }
         public static OptLog of(String userName, int opType, long opTs, String pageName,
                                 String pageName0,
                                 String pageName1,

@@ -5,6 +5,7 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFuncti
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class SpecialEleProcess extends
             resVal +=  element.f2;
             resKey +=1;
         }
+
 
 
         String[] keyRes =  key.split("_");

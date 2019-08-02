@@ -20,6 +20,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.table.api.StreamQueryConfig;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
@@ -28,6 +29,7 @@ import org.apache.flink.table.sinks.CsvTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.table.sources.CsvTableSource;
 import org.apache.flink.table.sources.TableSource;
+import org.apache.flink.types.Row;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -104,7 +106,7 @@ public class TestKeyedState {
                 .assignTimestampsAndWatermarks(new TimeLagWaterMarkGen()).setParallelism(1);
 
 
-        inputStream.print();
+//        inputStream.print();
 
 
         /**
@@ -116,37 +118,37 @@ public class TestKeyedState {
          *                     '}';
          *         }
          */
-//        Table table = tEnv.fromDataStream(inputStream, "userName, opType, opTs, pageName");
-//        Table result = tEnv.sqlQuery(
-//                "SELECT userName, count(1) as count FROM " + table + " group by username");
-        tEnv.registerDataStream("agg_table", inputStream, "userName, opType, eventTime, pageName");
+        //内置参数rowtime.rowtime就是eventtime protime是processing time
+        tEnv.registerDataStream("agg_table", inputStream, "userName, opType, eventTime, pageName,rowtime.rowtime");
 
-
-
-        Table ta = tEnv.sqlQuery("SELECT TUMBLE_END(eventTime, INTERVAL '10' SECOND) AS win," +
+        Table ta = tEnv.sqlQuery("SELECT TUMBLE_START(rowtime, INTERVAL '10' SECOND) AS win," +
                 "pageName, count(*) AS ct " +
-                "FROM agg_table GROUP BY TUMBLE(eventTime, INTERVAL '10' SECOND), pageName");
+                "FROM agg_table GROUP BY TUMBLE(rowtime, INTERVAL '10' SECOND), pageName");
         tEnv.registerTable("agg_tmp", ta);
 
-//        Table tb = tEnv.sqlQuery("SELECT pageName,opType FROM agg_tmp ");
+        tEnv.toRetractStream(ta, Row.class).print();
 
-
-        ta.printSchema();
+//
+//        Table tb = tEnv.sqlQuery("SELECT pageName,ct FROM agg_tmp ");
+//
+//        tEnv.toRetractStream(tb, Types.TUPLE(Types.STRING,Types.LONG));
+//
+//        ta.printSchema();
 //        tb.printSchema();
 
 
 
         DataStream<Tuple2<String, Long>> appendStream = tEnv.toAppendStream(ta,Types.TUPLE(Types.STRING,Types.LONG));
         appendStream.print();
-
-        tEnv.toRetractStream(ta, Order.class).print();
+//
+//        tEnv.toRetractStream(ta, Order.class).print();
 
 //        TableSource csvSource = new CsvTableSource(path, new String[]{"word"},
 //                new TypeInformation[]{Types.STRING});
-        TableSink csvSink = new CsvTableSink("res.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
-        String[] fieldNames = {"pageName", "opType"};
-        TypeInformation[] fieldTypes = {Types.STRING, Types.LONG};
-        tEnv.registerTableSink("resTable", fieldNames, fieldTypes, csvSink);
+//        TableSink csvSink = new CsvTableSink("res.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
+//        String[] fieldNames = {"pageName", "opType"};
+//        TypeInformation[] fieldTypes = {Types.STRING, Types.LONG};
+//        tEnv.registerTableSink("resTable", fieldNames, fieldTypes, csvSink);
 
 //        tb.writeToSink(csvSink);
 // run a SQL update query on the Table and emit the result to the TableSink

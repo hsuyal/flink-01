@@ -39,7 +39,7 @@ public class KafkaMaskExt implements AssignerWithPeriodicWatermarks<JSONObject> 
 //                && element.getJSONObject("report") != null
 //                && element.getJSONObject("report").getJSONObject("identifiers") != null) {
 //
-//            JSONObject object = element.getJSONObject("report").getJSONObject("identifiers");
+//            JSONObject object = element.get("reportTime").getJSONObject("identifiers");
 //
 //            if(object != null && object.getString("locusStartTime") != null) {
 //                System.out.println("object value is:" + object);

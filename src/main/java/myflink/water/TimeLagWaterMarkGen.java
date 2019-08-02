@@ -23,6 +23,6 @@ public class TimeLagWaterMarkGen implements AssignerWithPeriodicWatermarks<OptLo
 
     @Override
     public long extractTimestamp(OptLog element, long previousElementTimestamp) {
-        return element.getOpTs();
+        return element.getEventTime().getTime();
     }
 }

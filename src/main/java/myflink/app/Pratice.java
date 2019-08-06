@@ -19,6 +19,85 @@ public class Pratice {
         pintListConvse(tail3);
     }
 
+
+    private static boolean search(int[][] array, int target) {
+        int i = 0;
+        int j = array[0].length - 1;
+        int len = array[0].length;
+
+        while ( i <= len - 1 && j >= 0) {
+            if(array[i][j] == target) {
+                return true;
+            }else if(array[i][j] >= target) {
+                i++;
+            }else {
+                j--;
+            }
+        }
+        return false;
+
+    }
+
+
+    private Node reverListXunhuan(Node head) {
+        if(head == null || head.next  == null)  {
+            return head;
+        }
+
+
+        Node p1 = head;
+        Node p2 = p1.next;
+
+        Node tmp = new Node("-1",  null);
+        tmp.next = null;
+
+        while (p1 != null) {
+            p1.next  = tmp.next;
+            tmp.next = p1;
+
+            p1  = p2;
+            if(p1 == null)  {
+                break;
+            }
+            p2 = p1.next;
+        }
+
+        return tmp.next;
+    }
+
+
+    /**
+     * 递归方式
+     * @param head
+     * @return
+     */
+    private Node reverseList(Node head) {
+
+        if (head == null) {
+            return head;
+        }
+
+        Node newHead = reverseList(head.next);
+        Node curNode = newHead;
+
+        while (curNode != null && curNode.next != null) {
+            curNode = curNode.next;
+        }
+        curNode.next = head;
+        head.next = null;
+
+        return newHead;
+    }
+
+    class Node {
+        public String data;
+        public Node  next;
+        public Node(String  data, Node next) {
+            this.data = data;
+            this.next = next;
+        }
+    }
+
     /**
      * 从后往前打印列表 ，递归
      * @param head
@@ -35,29 +114,45 @@ public class Pratice {
 
 
     /**
-     * 从后往前打印列表
-     * @param head
+     * 从后往前打印链表,使用栈来考虑
+     * @param node
      */
-    private static void print(ListNode head) {
-        if(head == null) {
-            return ;
+    private static void print01(ListNode node) {
+        if(node == null) {
+            return;
         }
-        Stack<Integer> stack = new Stack();
-        while (head != null) {
-            stack.push(head.val);
 
-            ListNode tmp = head.next;
-            head = tmp;
+        Stack<Integer> stack = new Stack<>();
+        while (node != null) {
+            stack.push(node.val);
+            node = node.next;
         }
 
         while (!stack.isEmpty()) {
             System.out.println(stack.pop());
         }
+    }
 
+    /**
+     * 从后往前打印链表,使用栈来考虑
+     * @param node
+     */
+    private static List<Integer> print02(ListNode node) {
+        List<Integer> list = new ArrayList<>();
+        while (node != null) {
+            list.add(node.val);
+            node = node.next;
+        }
+        Collections.reverse(list);
+        return list;
     }
 
 
+
+    //用来pop
     static Stack<Integer> s0 = new Stack<>();
+
+    //push
     static Stack<Integer> s1 = new Stack<>();
 
     /**
@@ -72,23 +167,73 @@ public class Pratice {
      * @return
      */
     private static void offer(int i) {
-
         s1.push(i);
-
     }
 
     private static int poll() throws Exception {
-        if (s1.isEmpty() && s0.isEmpty()) {
-            throw new Exception("null");
+        if(s1.isEmpty() && s0.isEmpty()) {
+            throw new Exception("error");
         }
 
-
-        while (!s0.isEmpty() && s1.isEmpty()) {
-            s1.push(s0.pop());
+        if(s0.isEmpty()) {
+            while (!s1.isEmpty()) {
+                s0.push(s1.pop());
+            }
         }
-
-        return s1.pop();
+        return s0.pop();
     }
+
+
+    /**
+     * 斐波那契数列
+     * @param n
+     * @return
+     */
+    private int fibonacci(int n) {
+        if(n  == 0)
+            return 0;
+        if(n ==1) {
+            return 1;
+        }
+
+        int fib0 = 0;
+        int res = 1;
+        int fib1 = 1;
+
+        for(int i = 2; i < n; i++) {
+            res = fib0 + fib1;
+            fib0 = fib1;
+            fib1 = res;
+        }
+        return res;
+    }
+    /**
+     * .一只青蛙一次可以跳上1级台阶，也可以跳上2级。
+     * 求该青蛙跳上一个 n 级台阶总共有多少种跳法
+     */
+    private int getMethodNumber(int n) {
+        if(n == 0)
+            return 0;
+        if(n == 1)
+            return 1;
+        if(n ==  2)
+            return 2;
+        return getMethodNumber(n-1) + getMethodNumber(n-2);
+    }
+
+
+
+    private static int getNum(int n) {
+        int num = 0;
+        while (n != 0) {
+            num++;
+            n = (n-1)&n;
+        }
+        return num;
+    }
+
+
+
 
 
     private ListNode deleteNode0(ListNode head, ListNode toBeDeletd) {

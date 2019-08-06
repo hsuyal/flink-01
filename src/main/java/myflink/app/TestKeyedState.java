@@ -1,14 +1,11 @@
 package myflink.app;
 
-import myflink.keyedstate.PvUvProcessFunction;
 import myflink.model.OptLog;
 import myflink.water.TimeLagWaterMarkGen;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
@@ -18,20 +15,13 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.table.api.StreamQueryConfig;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.shaded.org.joda.time.DateTime;
 import org.apache.flink.table.sinks.CsvTableSink;
 import org.apache.flink.table.sinks.TableSink;
-import org.apache.flink.table.sources.CsvTableSource;
-import org.apache.flink.table.sources.TableSource;
-import org.apache.flink.types.Row;
-
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -121,26 +111,41 @@ public class TestKeyedState {
         //内置参数rowtime.rowtime就是eventtime protime是processing time
         tEnv.registerDataStream("agg_table", inputStream, "userName, opType, eventTime, pageName,rowtime.rowtime");
 
-        Table ta = tEnv.sqlQuery("SELECT TUMBLE_START(rowtime, INTERVAL '10' SECOND) AS win," +
-                "pageName, count(*) AS ct " +
-                "FROM agg_table GROUP BY TUMBLE(rowtime, INTERVAL '10' SECOND), pageName");
+
+        String sinkTableName = "csvSink";
+        TableSink tableSink = getTableSink();
+        String[] fieldNames = {"win_start", "win_end", "pageName", "opType"};
+        TypeInformation[] fieldTypes = {Types.SQL_TIMESTAMP, Types.SQL_TIMESTAMP, Types.STRING, Types.LONG};
+        tEnv.registerTableSink(sinkTableName,fieldNames, fieldTypes, tableSink);
+
+
+        String sqlQuery = "SELECT TUMBLE_START(rowtime, INTERVAL '10' SECOND) AS win_start," +
+                "TUMBLE_START(rowtime, INTERVAL '10' SECOND) AS win_end," +
+                "pageName, count(pageName) AS ct " +
+                "FROM agg_table GROUP BY TUMBLE(rowtime, INTERVAL '10' SECOND), pageName";
+        Table ta = tEnv.sqlQuery(sqlQuery);
         tEnv.registerTable("agg_tmp", ta);
 
-        tEnv.toRetractStream(ta, Row.class).print();
+
+
+        ta.insertInto(sinkTableName);
+
+//        tEnv.toRetractStream(ta, Row.class).print();
+
+
+
+//        DataStream<Tuple2<String, Long>> appendStream = tEnv.toAppendStream(ta,Types.TUPLE(Types.STRING,Types.LONG));
+//        appendStream.print();
 
 //
+
+        //
 //        Table tb = tEnv.sqlQuery("SELECT pageName,ct FROM agg_tmp ");
 //
 //        tEnv.toRetractStream(tb, Types.TUPLE(Types.STRING,Types.LONG));
 //
 //        ta.printSchema();
 //        tb.printSchema();
-
-
-
-        DataStream<Tuple2<String, Long>> appendStream = tEnv.toAppendStream(ta,Types.TUPLE(Types.STRING,Types.LONG));
-        appendStream.print();
-//
 //        tEnv.toRetractStream(ta, Order.class).print();
 
 //        TableSource csvSource = new CsvTableSource(path, new String[]{"word"},
@@ -174,6 +179,15 @@ public class TestKeyedState {
 //        res.print();
         env.execute();
     }
+
+    private static TableSink getTableSink() {
+        TableSink csvSink = new CsvTableSink("res.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
+        String[] fieldNames = {"win_start", "win_end", "pageName", "opType"};
+        TypeInformation[] fieldTypes = {Types.SQL_TIMESTAMP, Types.SQL_TIMESTAMP, Types.STRING, Types.LONG};
+        csvSink.configure(fieldNames, fieldTypes);
+        return csvSink;
+    }
+
 
 
     public static class Order {

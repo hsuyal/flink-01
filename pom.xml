@@ -104,11 +104,7 @@ under the License.
 			<artifactId>flink-connector-kafka-0.11_2.11</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.cisco.wx2</groupId>
-			<artifactId>diagnostic-events-gson</artifactId>
-			<version>1.0.210</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>

@@ -3,6 +3,7 @@ package myflink.app;
 /**
  * Created by xumingyang on 2019/8/2.
  */
+
 import java.util.*;
 
 /**
@@ -15,6 +16,11 @@ public class Pratice {
         ListNode tail2 = new ListNode(3, tail1);
         ListNode tail3 = new ListNode(4, tail2);
 
+        boolean t = new Pratice().isPalindrome("A man, a plan, a canal: Panama");
+
+        String s = new Pratice().reverseWords("the sky is blue");
+
+        System.out.println(s);
 
         pintListConvse(tail3);
     }
@@ -25,12 +31,12 @@ public class Pratice {
         int j = array[0].length - 1;
         int len = array[0].length;
 
-        while ( i <= len - 1 && j >= 0) {
-            if(array[i][j] == target) {
+        while (i <= len - 1 && j >= 0) {
+            if (array[i][j] == target) {
                 return true;
-            }else if(array[i][j] >= target) {
+            } else if (array[i][j] >= target) {
                 i++;
-            }else {
+            } else {
                 j--;
             }
         }
@@ -40,7 +46,7 @@ public class Pratice {
 
 
     private Node reverListXunhuan(Node head) {
-        if(head == null || head.next  == null)  {
+        if (head == null || head.next == null) {
             return head;
         }
 
@@ -48,15 +54,15 @@ public class Pratice {
         Node p1 = head;
         Node p2 = p1.next;
 
-        Node tmp = new Node("-1",  null);
+        Node tmp = new Node("-1", null);
         tmp.next = null;
 
         while (p1 != null) {
-            p1.next  = tmp.next;
+            p1.next = tmp.next;
             tmp.next = p1;
 
-            p1  = p2;
-            if(p1 == null)  {
+            p1 = p2;
+            if (p1 == null) {
                 break;
             }
             p2 = p1.next;
@@ -66,8 +72,39 @@ public class Pratice {
     }
 
 
+    public String reverseWords(String s) {
+        if (s == null) {
+            return s;
+        }
+        StringBuilder sb = new StringBuilder();
+        Stack<String> stack = new Stack<>();
+
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) != ' ') {
+                sb.append(s.charAt(i));
+            } else {
+                if (sb.length() > 0) {
+                    stack.push(sb.toString());
+                    sb = new StringBuilder();
+                }
+
+            }
+        }
+
+        stack.push(sb.toString());
+
+        StringBuilder rs = new StringBuilder();
+        while (!stack.isEmpty()) {
+            rs.append(stack.pop() + " ");
+        }
+
+        return rs.toString().trim();
+    }
+
+
     /**
      * 递归方式
+     *
      * @param head
      * @return
      */
@@ -91,8 +128,9 @@ public class Pratice {
 
     class Node {
         public String data;
-        public Node  next;
-        public Node(String  data, Node next) {
+        public Node next;
+
+        public Node(String data, Node next) {
             this.data = data;
             this.next = next;
         }
@@ -100,10 +138,11 @@ public class Pratice {
 
     /**
      * 从后往前打印列表 ，递归
+     *
      * @param head
      */
     private static void pintListConvse(ListNode head) {
-        if(head  == null) {
+        if (head == null) {
             return;
         }
 
@@ -115,10 +154,11 @@ public class Pratice {
 
     /**
      * 从后往前打印链表,使用栈来考虑
+     *
      * @param node
      */
     private static void print01(ListNode node) {
-        if(node == null) {
+        if (node == null) {
             return;
         }
 
@@ -135,6 +175,7 @@ public class Pratice {
 
     /**
      * 从后往前打印链表,使用栈来考虑
+     *
      * @param node
      */
     private static List<Integer> print02(ListNode node) {
@@ -146,7 +187,6 @@ public class Pratice {
         Collections.reverse(list);
         return list;
     }
-
 
 
     //用来pop
@@ -163,6 +203,7 @@ public class Pratice {
 
     /**
      * 加入队列
+     *
      * @param i
      * @return
      */
@@ -171,11 +212,11 @@ public class Pratice {
     }
 
     private static int poll() throws Exception {
-        if(s1.isEmpty() && s0.isEmpty()) {
+        if (s1.isEmpty() && s0.isEmpty()) {
             throw new Exception("error");
         }
 
-        if(s0.isEmpty()) {
+        if (s0.isEmpty()) {
             while (!s1.isEmpty()) {
                 s0.push(s1.pop());
             }
@@ -186,13 +227,14 @@ public class Pratice {
 
     /**
      * 斐波那契数列
+     *
      * @param n
      * @return
      */
     private int fibonacci(int n) {
-        if(n  == 0)
+        if (n == 0)
             return 0;
-        if(n ==1) {
+        if (n == 1) {
             return 1;
         }
 
@@ -200,51 +242,48 @@ public class Pratice {
         int res = 1;
         int fib1 = 1;
 
-        for(int i = 2; i < n; i++) {
+        for (int i = 2; i < n; i++) {
             res = fib0 + fib1;
             fib0 = fib1;
             fib1 = res;
         }
         return res;
     }
+
     /**
      * .一只青蛙一次可以跳上1级台阶，也可以跳上2级。
      * 求该青蛙跳上一个 n 级台阶总共有多少种跳法
      */
     private int getMethodNumber(int n) {
-        if(n == 0)
+        if (n == 0)
             return 0;
-        if(n == 1)
+        if (n == 1)
             return 1;
-        if(n ==  2)
+        if (n == 2)
             return 2;
-        return getMethodNumber(n-1) + getMethodNumber(n-2);
+        return getMethodNumber(n - 1) + getMethodNumber(n - 2);
     }
-
 
 
     private static int getNum(int n) {
         int num = 0;
         while (n != 0) {
             num++;
-            n = (n-1)&n;
+            n = (n - 1) & n;
         }
         return num;
     }
 
 
-
-
-
     private ListNode deleteNode0(ListNode head, ListNode toBeDeletd) {
-        if(head == null || toBeDeletd == null) {
+        if (head == null || toBeDeletd == null) {
             return head;
         }
 
-        if(head == toBeDeletd) {
+        if (head == toBeDeletd) {
             return null;
-        }else {
-            if(toBeDeletd.next == null) {
+        } else {
+            if (toBeDeletd.next == null) {
 
                 ListNode ptr = head;
                 while (ptr.next.next != null) {
@@ -252,7 +291,7 @@ public class Pratice {
                 }
 
                 ptr.next = null;
-            }else {
+            } else {
                 toBeDeletd.val = toBeDeletd.next.val;
                 toBeDeletd.next = toBeDeletd.next.next;
             }
@@ -270,16 +309,16 @@ public class Pratice {
             return head;
         }
 
-        if(head == toBeDeletd) {
+        if (head == toBeDeletd) {
             return null;
-        }else {
-            if(toBeDeletd.next == null) {
+        } else {
+            if (toBeDeletd.next == null) {
                 ListNode pr = head;
                 while (pr.next.next != null) {
                     pr = pr.next;
                 }
                 pr.next = null;
-            }else {
+            } else {
                 toBeDeletd.val = toBeDeletd.next.val;
                 toBeDeletd.next = toBeDeletd.next.next;
             }
@@ -293,6 +332,7 @@ public class Pratice {
 
     /**
      * 链表中的倒数第K个节点
+     *
      * @param head
      * @param k
      * @return
@@ -301,10 +341,10 @@ public class Pratice {
         ListNode faster = head;
         ListNode slow = head;
 
-        for(int i = 0; i < k-1; i++) {
-            if(faster.next != null) {
+        for (int i = 0; i < k - 1; i++) {
+            if (faster.next != null) {
                 faster = faster.next;
-            }else {
+            } else {
                 return null;
             }
         }
@@ -319,6 +359,7 @@ public class Pratice {
 
     /**
      * 反转链表 递归解法
+     *
      * @param head
      * @return
      */
@@ -341,36 +382,194 @@ public class Pratice {
     }
 
 
-
     private boolean search(int[] array, int target) {
-        if(array == null || array.length == 0) {
+        if (array == null || array.length == 0) {
             return false;
         }
 
         int start = 0;
-        int end = array.length -  1;
+        int end = array.length - 1;
 
         while (start < end) {
 
-            int mid =  (start+end)/2;
+            int mid = (start + end) / 2;
 
-            if(target == array[mid]) {
+            if (target == array[mid]) {
                 return true;
-            }else if(target > array[mid]) {
+            } else if (target > array[mid]) {
                 start++;
-            }else {end--;}
+            } else {
+                end--;
+            }
         }
         return false;
+    }
+
+    public ListNode deleteDuplicates(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+
+        ListNode p0 = head;
+        while (p0 != null && p0.next != null) {
+            if (p0.val == p0.next.val) {
+                p0.next = p0.next.next;
+            } else {
+                p0 = p0.next;
+            }
+        }
+
+        return head;
+    }
+
+
+    public int singleNumber(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return -1;
+        }
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        for (int i = 0; i < nums.length; i++) {
+            if (map.containsKey(nums[i])) {
+                map.remove(nums[i]);
+            } else {
+                map.put(nums[i], 1);
+            }
+        }
+
+        return map.keySet().iterator().next();
+    }
+
+
+    List<List<String>> res = new ArrayList<>();
+//    public List<List<String>> partition(String s) {
+//        if(s==""||s.length()==0){
+//            return res;
+//        }
+//        List<String> list=new ArrayList<>();
+//        backTracing(list,s,0);
+//        return res;
+//    }
+
+//    public void backTracing(List<String> list,String s, int i){
+//        if(i==s.length()){
+//            res.add(list);
+//        }
+//        for(int j=i+1;j<=s.length();++j){
+//            if(isParlindrome(s.substring(i,j))){
+//                list.add(s.substring(i,j));
+//                backTracing(new ArrayList<String> (list),s,j);
+//                list.remove(list.size()-1);
+//            }
+//        }
+//    }
+
+    /**
+     * 验证是否为回文串
+     *
+     * @param s
+     * @return
+     */
+    public boolean isPalindrome(String s) {
+        if (s == null) {
+            return false;
+        }
+
+        s = s.toLowerCase();
+
+        for (int i = 0, j = s.length() - 1; i < j; i++, j--) {
+            while (i < j && !Character.isLetter(s.charAt(i))) i++;
+            while (i < j && !Character.isLetter(s.charAt(j))) j--;
+
+
+            if (s.charAt(i) != s.charAt(j)) {
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    public int singleNumber0(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return -1;
+        }
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        for (int i = 0; i < nums.length; i++) {
+            nums[i] ^= nums[i + 1];
+        }
+
+        return map.keySet().iterator().next();
+    }
+
+    /**
+     * 合并有序数组
+     *
+     * @param nums1
+     * @param m
+     * @param nums2
+     * @param n
+     * @return
+     */
+    public int[] merge(int[] nums1, int m, int[] nums2, int n) {
+        if (nums1 == null || nums1.length == 0) {
+            return nums2;
+        }
+
+        if (nums2 == null || nums2.length == 0) {
+            return nums1;
+        }
+
+        int i = m - 1, j = n - 1, k = m + n - 1;
+        int[] res = new int[m + n];
+
+        while (i >= 0 && j >= 0) {
+            if (nums1[i] < nums2[j]) {
+                res[k] = nums2[j];
+                j--;
+            } else {
+                res[k] = nums1[i];
+                i--;
+            }
+            k--;
+        }
+
+        System.arraycopy(nums2, 0, nums1, 0, j + 1);
+
+        return res;
+    }
+
+    public int removeDuplicates(int[] nums) {
+        int index = 0;
+        int count = 0;
+
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            if (i == 0 || nums[i - 1] == nums[1]) {
+                count++;
+            } else if (nums[i - 1] != nums[i]) {
+                count = 1;
+            }
+
+            if (count <= 2) {
+                nums[index++] = nums[i];
+            }
+        }
+
+        return index;
     }
 
 
     /**
      * 非递归
+     *
      * @param head
      * @return
      */
     private ListNode reverseList_1(ListNode head) {
-        if(head == null || head.next == null) {
+        if (head == null || head.next == null) {
             return null;
         }
 
@@ -381,15 +580,15 @@ public class Pratice {
 
         while (p1 != null) {
             p1.next = dummy.next;
-            dummy.next =  p1;
+            dummy.next = p1;
 
             p1 = p2;
 
-            if(p1 == null) {
+            if (p1 == null) {
                 break;
             }
 
-            p2  = p1.next;
+            p2 = p1.next;
         }
 
         return dummy.next;
@@ -398,22 +597,23 @@ public class Pratice {
 
     /**
      * 合并两个排序链表
+     *
      * @param list1
      * @param list2
      * @return
      */
     public ListNode merge(ListNode list1, ListNode list2) {
 
-        if(list1 == null) {
+        if (list1 == null) {
             return list2;
         }
 
-        if(list2 == null) {
+        if (list2 == null) {
             return list1;
         }
 
-        if(list1.val < list2.val) {
-            ListNode mergedList  = merge(list1.next, list2);
+        if (list1.val < list2.val) {
+            ListNode mergedList = merge(list1.next, list2);
             list1.next = mergedList;
             return list1;
         }
@@ -429,7 +629,7 @@ public class Pratice {
         List<Integer> list = new ArrayList<>();
 
 
-        if(tree == null) {
+        if (tree == null) {
             return list;
         }
 
@@ -441,11 +641,11 @@ public class Pratice {
 
             linkedList.poll();
             list.add(tree.val);
-            if(tree.left != null) {
+            if (tree.left != null) {
                 linkedList.addLast(tree.left);
             }
 
-            if(tree.right != null) {
+            if (tree.right != null) {
                 linkedList.addLast(tree.right);
             }
         }
@@ -457,6 +657,7 @@ public class Pratice {
 
     /**
      * 找出最小的K个数
+     *
      * @param input
      * @param k
      * @return
@@ -472,11 +673,11 @@ public class Pratice {
 
         PriorityQueue<Integer> queue = new PriorityQueue<>(Comparator.reverseOrder());
 
-        for(int i : input) {
-            if(queue.size() < k) {
+        for (int i : input) {
+            if (queue.size() < k) {
                 queue.add(i);
-            }else {
-                if(queue.peek() <  i) {
+            } else {
+                if (queue.peek() < i) {
                     queue.poll();
                     queue.add(i);
                 }
@@ -490,11 +691,12 @@ public class Pratice {
 
     /**
      * 求连续数组的最大和
+     *
      * @param array
      * @return
      */
     public int findGreatestSumOfSubArray0(int[] array) {
-        if(array ==  null  || array.length  == 0) {
+        if (array == null || array.length == 0) {
             return -1;
         }
 
@@ -506,8 +708,8 @@ public class Pratice {
 
         int maxSum = curSum;
 
-        for(int i = 0; i < array.length; i++) {
-            sum[i] = sum[i-1] > 0 ? array[i] + sum[i-1] : array[i];
+        for (int i = 0; i < array.length; i++) {
+            sum[i] = sum[i - 1] > 0 ? array[i] + sum[i - 1] : array[i];
 
             maxSum = Math.max(maxSum, sum[i]);
         }
@@ -517,7 +719,7 @@ public class Pratice {
     }
 
     private int partition(int[] array, int start, int end) {
-        if(array == null || start > end) {
+        if (array == null || start > end) {
             return -1;
         }
 
@@ -539,8 +741,8 @@ public class Pratice {
         return start;
     }
 
-    private void sort(int[]  array) {
-        if(array == null || array.length == 0) {
+    private void sort(int[] array) {
+        if (array == null || array.length == 0) {
             return;
         }
 
@@ -548,23 +750,24 @@ public class Pratice {
         int mid = partition(array, 0, len);
 
         partition(array, 0, mid);
-        partition(array, mid+1, len);
+        partition(array, mid + 1, len);
     }
 
 
     /**
      * 输入两个链表，找出他们第一个公共节点
+     *
      * @param pHead1
      * @param pHead2
      * @return
      */
     private ListNode FindFirstCommonNode(ListNode pHead1, ListNode pHead2) {
-        if(pHead1 == null || pHead1 == null) {
+        if (pHead1 == null || pHead1 == null) {
             return null;
         }
 
         int size1 = 0;
-        int size2  = 0;
+        int size2 = 0;
         while (pHead1 != null) {
             size1++;
             pHead1 = pHead1.next;
@@ -576,12 +779,12 @@ public class Pratice {
         }
 
 
-        if(size1 < size2) {
-            for(int i = 0; i < size2-size1; i++) {
+        if (size1 < size2) {
+            for (int i = 0; i < size2 - size1; i++) {
                 pHead2 = pHead2.next;
             }
-        }else  {
-            for(int i = 0; i < size1-size2; i++) {
+        } else {
+            for (int i = 0; i < size1 - size2; i++) {
                 pHead1 = pHead1.next;
             }
         }
@@ -595,10 +798,10 @@ public class Pratice {
 
     /**
      * 一个数字在排序数组中出现的次数
+     *
      * @param nums
      * @param k
-     * @return
-     * TODO >????
+     * @return TODO >????
      */
     private int getNumberOfK(int[] nums, int k) {
 //        if(nums == null || nums.length == 0) {
@@ -618,39 +821,40 @@ public class Pratice {
     }
 
     private int getTreeDepth(TreeNode root) {
-        if(root == null) {
+        if (root == null) {
             return 0;
         }
 
         int left = getTreeDepth(root.left);
         int right = getTreeDepth(root.right);
 
-        if(left > right) {
-            return left+1 ;
-        }else {
-            return right+1;
+        if (left > right) {
+            return left + 1;
+        } else {
+            return right + 1;
         }
 
     }
 
     /**
      * 无序数组
+     *
      * @param data
      * @param sum
      * @return
      */
     private boolean findNumberWithSum(int[] data, int sum) {
-        if(data == null || data.length == 0) {
+        if (data == null || data.length == 0) {
             return false;
         }
 
         Map<Integer, Integer> map = new HashMap<>();
-        for(int i = 0 ; i < data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             map.put(data[i], i);
         }
 
-        for(int i= 0; i < data.length; i++) {
-            if(map.containsKey(sum-data[i])) {
+        for (int i = 0; i < data.length; i++) {
+            if (map.containsKey(sum - data[i])) {
                 return true;
             }
         }
@@ -660,12 +864,13 @@ public class Pratice {
 
     /**
      * 有序数组
+     *
      * @param data
      * @param sum
      * @return
      */
     private boolean findSortedNumberWithSum(int[] data, int sum) {
-        if(data == null || data.length == 0) {
+        if (data == null || data.length == 0) {
             return false;
         }
 
@@ -675,11 +880,11 @@ public class Pratice {
         while (start < end) {
             int curSum = data[start] + data[end];
 
-            if(curSum == sum) {
+            if (curSum == sum) {
                 return true;
-            }else if(curSum < sum) {
+            } else if (curSum < sum) {
                 start++;
-            }else {
+            } else {
                 end--;
             }
         }
@@ -696,6 +901,7 @@ public class Pratice {
 
     /**
      * 和为S的连续正数序列
+     *
      * @param sum
      * @return
      */
@@ -707,14 +913,14 @@ public class Pratice {
         int curSum = 3;
 
         while (start < end) {
-            if(sum == curSum) {
+            if (sum == curSum) {
                 getListFromleftToright(start, end);
                 end++;
                 curSum += end;
-            }else if(sum < curSum) {
+            } else if (sum < curSum) {
                 start++;
-                curSum -=  start;
-            }else {
+                curSum -= start;
+            } else {
                 curSum += end;
                 end++;
             }
@@ -726,22 +932,22 @@ public class Pratice {
 
     /**
      * 最长的不含重复字符的字串，计算该最长字符串的长度
-     *假设该字符串中只包含从a到z的字符
-     *
+     * 假设该字符串中只包含从a到z的字符
+     * <p>
      * 动态规划，
      * res[i]表示以s[i】字符结尾的最长的不重复字符串的长度
      * 若s[i]在前面没有出现过，那么res[i] = res[i-1] + 1
      * 若s[i]在前面出现过，判断踏上一次出现的位置pos和i的距离d与res[i-1]的大小关系
      * 若d > res[i-1]证是在res[i-1]的左侧，则res[i] = res[i-1] + 1
      * 若d<=res[i-1]，说明是在res[i-1]构成的子串中，那么res[i-1]=d;
-     *
+     * <p>
      * 判断s[i]
      *
      * @param str
      * @return
      */
     public int longestSubstringWithoutDuplication(String str) {
-        if(str == null || "".equals(str)) {
+        if (str == null || "".equals(str)) {
             return 0;
         }
 
@@ -749,7 +955,7 @@ public class Pratice {
 
         int[] s = new int[26];
 
-        for(int i = 0 ; i < s.length; i++) {
+        for (int i = 0; i < s.length; i++) {
             s[i] = -1;
         }
 
@@ -762,12 +968,12 @@ public class Pratice {
 
         int max = res[0];
 
-        for(int i = 1;  i < n; i++) {
+        for (int i = 1; i < n; i++) {
             //当前出现的字符在哪个位置
             int pos = s[chs[i] - 'a'];// pos = s[24]
             int dis = i - pos;
 
-            res[i] = ((pos == -1) ||  dis > res[i-1]) ? res[i-1] + 1 : dis;
+            res[i] = ((pos == -1) || dis > res[i - 1]) ? res[i - 1] + 1 : dis;
             s[chs[i] - 'a'] = i;
             max = Math.max(max, res[i]);
         }
@@ -787,7 +993,6 @@ public class Pratice {
 }
 
 
-
 class TreeNode {
     int val = 0;
     TreeNode left = null;
@@ -799,7 +1004,7 @@ class TreeNode {
     }
 }
 
-class ListNode{
+class ListNode {
     public int val;
     public ListNode next;
 

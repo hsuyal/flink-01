@@ -11,19 +11,44 @@ import java.util.*;
  */
 public class Pratice {
     public static void main(String[] args) {
-        ListNode tail = new ListNode(1, null);
-        ListNode tail1 = new ListNode(2, tail);
-        ListNode tail2 = new ListNode(3, tail1);
-        ListNode tail3 = new ListNode(4, tail2);
 
-        boolean t = new Pratice().isPalindrome("A man, a plan, a canal: Panama");
+//        replace("hello    world nihao");
 
-        String s = new Pratice().reverseWords("the sky is blue");
+//        String str = new String("abc");
+//        myPrint(str.toCharArray(), 0);
 
-        System.out.println(s);
+//        int t = new Pratice().MoreThanHalfNum_Solution(new int[] {1,3,4,5,5,5,5,5});
 
-        pintListConvse(tail3);
+
+        System.out.println(findNum(new int[] {1,3,4,5,5,5,5,5}));
+//        System.out.println(t);
+//        comb(str);
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private static boolean search(int[][] array, int target) {
@@ -224,6 +249,47 @@ public class Pratice {
         return s0.pop();
     }
 
+    public int FirstNotRepeatingChar(String str) {
+        if(str == null || "".equals(str)) {
+            return -1;
+        }
+
+        int[] res = new int[256];
+
+        for(int i = 0; i < str.length(); i++) {
+            char s = str.charAt(i);
+            int pos = (int)s;
+            res[pos]++;
+        }
+
+
+
+        for(int i = 0; i < str.length(); i++) {
+            char s = str.charAt(i);
+            int pos = (int)s;
+            if(res[pos] == 1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int findKLargestNum(int[] arr, int k) {
+        if(arr == null || arr.length == 0) {
+            return Integer.MIN_VALUE;
+        }
+        Arrays.sort(arr);
+
+        int len = arr.length;
+
+        while (k > 0) {
+            k--;
+            len--;
+        }
+
+        return arr[len+1];
+    }
+
 
     /**
      * 斐波那契数列
@@ -300,6 +366,43 @@ public class Pratice {
 
 
         return head;
+
+    }
+
+
+    public int MoreThanHalfNum_Solution(int [] array) {
+        int len=array.length;
+        if(len<1){
+            return 0;
+        }
+        int count=0;
+        Arrays.sort(array);
+        int num=array[len/2];
+        for(int i=0;i<len;i++){
+            if(num==array[i])
+                count++;
+        }
+        if(count<=(len/2)){
+            num=0;
+        }
+        return num;
+    }
+
+
+    private static ListNode getMidNode(ListNode head) {
+        if(head == null || head.next == null) {
+            return head;
+        }
+        ListNode p0 = head;
+        ListNode p1 = head;
+
+
+        while (p1.next != null || p1.next.next != null) {
+            p0 = p0.next;
+            p1 = p1.next.next;
+        }
+
+        return p0;
 
     }
 
@@ -405,6 +508,23 @@ public class Pratice {
         return false;
     }
 
+    public int removeDuplicatesArrayåå(int[] nums) {
+        if(nums == null || nums.length == 0) {
+            return -1;
+        }
+
+        int len = nums.length;
+        int k = 0;
+        //1,1,2,2,4,5,6,6
+        for(int i = 1; i < len-1; i++) {
+            if(nums[i] != nums[k]) {
+                k++;
+                nums[k] = nums[i];
+            }
+        }
+        return k+1;
+    }
+
     public ListNode deleteDuplicates(ListNode head) {
         if (head == null || head.next == null) {
             return head;
@@ -463,6 +583,274 @@ public class Pratice {
 //            }
 //        }
 //    }
+
+
+
+    private int searchTarget(int[] arr, int target) {
+        int low = 0;
+        int high = arr.length - 1;
+        int mid = -1;
+
+        while (low < high) {
+            mid = low+high/2;
+            if(arr[mid] > target) {
+                high--;
+            }else if(arr[mid] < target) {
+                low++;
+            }else {
+                return mid;
+            }
+        }
+        return -1;
+    }
+
+    private int searchTarget(int[] arr, int target, int low, int high) {
+        if(arr == null || arr.length == 0 || low > high) {
+            return -1;
+        }
+
+        int mid = (low +high)/2;
+
+        if(arr[mid] == target) {
+            return mid;
+        }else if(arr[mid] > target) {
+            searchTarget(arr, target, low, mid-1);
+        }else if(arr[mid] < target) {
+            searchTarget(arr, target,mid+1, high);
+        }
+
+        return -1;
+
+    }
+
+    int  NumberOf1(int n) {
+        int count = 0;
+        while( n != 0) {
+            count++;
+
+            n = n & (n-1);
+        }
+
+        return count;
+    }
+
+
+    private static void myPrint(char[] str, int i) {
+        if(i >= str.length) {
+            return;
+        }
+
+        if(i == str.length - 1) {
+            System.out.println(String.valueOf(str));
+        }else {
+            for(int j = i; j < str.length; j++) {
+                char tmp = str[j];
+                str[j] = str[i];
+                str[i] = tmp;
+
+                myPrint(str, i+1);
+
+                tmp = str[j];
+                str[j] = str[i];
+                str[i] = tmp;
+            }
+        }
+
+    }
+
+    public static void comb(String str){
+        char[] chs = str.toCharArray();
+        int combNum = 1 << chs.length;//组合的个数有2^n的长度
+        int k;
+        for(int i = 0; i<combNum; i++){
+            for(int j = 0; j<chs.length; j++){
+                k = 1<<j;
+                if((k&i)!=0){//按位与运算，如果结果为1就输出当前位，结果为0不输出
+                    System.out.print(chs[j]);
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public static void per(char[] buf, String str,int length){
+        char[] chs = str.toCharArray();
+        if(length == 0){
+            for(int i = buf.length-1; i>=0; i--){
+                System.out.print(buf[i]);
+            }
+            System.out.println();
+            return;
+        }
+        for (int i = 0;i<chs.length;i++){
+            buf[length-1] = chs[i];
+            per(buf,str,length-1);
+        }
+    }
+
+
+    private static String replace(String s) {
+        StringBuilder sb = new StringBuilder();
+        int len = s.length();
+        for(int i = 0; i < len; i++) {
+            if(s.charAt(i) ==  ' ') {
+                sb.append("%20");
+            }else {
+                sb.append(s.charAt(i));
+            }
+        }
+
+        System.out.println(sb.toString());
+        return sb.toString();
+    }
+
+
+
+
+    private static String reverseSub(String s) {
+        if(s == null ||  "".equals(s)) {
+            return null;
+        }
+        String[] array = s.split(" ");
+        int len = array.length;
+
+        Stack<String> stack = new Stack<>();
+
+        for(int i = 0; i < len; i++) {
+            stack.push(array[i]);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.append(stack.pop() + " ");
+        }
+
+        return sb.toString().trim();
+    }
+
+
+
+    private static char getFirstStr(String s) {
+        char[] t = s.toCharArray();
+
+        int size = t.length;
+        int[] tt = new int[256];
+
+        for(int i = 0; i < 256; i++) {
+            tt[i] = 0;
+        }
+        Map<Character, List<Integer>> map = new HashMap<>();
+        for(int i = 0; i < size; i++) {
+            tt[t[i]] += 1;
+            System.out.println(tt[t[i]]);
+        }
+
+//        for(int i = 0; i < 256; i++) {
+//            System.out.println(tt[i]);
+//        }
+
+        for(int i = 0; i < size; i++) {
+            if(tt[t[i]] == 1) {
+                return t[i];
+            }
+        }
+
+        return ' ';
+    }
+
+
+
+    public static String LCS_caculate(String s1,String s2) {
+        int size1 = s1.length();
+        int size2 = s2.length();
+        int chess[][] = new int[s1.length() + 1][s2.length() + 1];
+        for (int i = 1; i <= size1; i++) {//根据上面提到的公式计算矩阵
+            for (int j = 1; j <= size2; j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                    chess[i][j] = chess[i - 1][j - 1] + 1;
+                } else {
+                    chess[i][j] = Math.max(chess[i][j - 1], chess[i - 1][j]);
+                }
+            }
+        }
+        int i = size1;
+        int j = size2;
+        StringBuffer sb = new StringBuffer();
+        while ((i != 0) && (j != 0)) {//利用上面得到的矩阵计算子序列，从最右下角往左上走
+            if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                sb.append(s1.charAt(i - 1));//相同时即为相同的子串
+                i--;
+                j--;
+            } else {
+                if (chess[i][j - 1] > chess[i - 1][j]) {
+                    j--;
+                } else {
+                    i--;
+                }
+            }
+        }
+        System.out.println((double) sb.length() / s2.length() + "," + (double) sb.length() / s1.length());
+        return sb.reverse().toString();//记得反转
+    }
+    private static String getCommonStr(String s0, String s1) {
+        if (s0 == null || s1 == null) {
+            return null;
+        }
+
+        char[] ch0 = s0.toCharArray();
+        char[] ch1 = s1.toCharArray();
+
+        int rows = ch0.length;
+        int cols = ch1.length;
+
+        int[][] res = new int[rows][cols];
+        int maxLen = 0;
+        int pos = 0;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (ch0[i] == ch1[j]) {
+                    if (i == 0 || j == 0) {
+                        res[i][j] = 1;
+                    } else {
+                        res[i][j] = res[i - 1][j - 1] + 1;
+                    }
+
+                } else {
+                    res[i][j] = 0;
+                }
+
+                if (res[i][j] > maxLen) {
+                    maxLen = res[i][j];
+                    pos = i;
+                }
+            }
+        }
+
+        System.out.println(maxLen + "_ " + pos + "_" + s0);
+
+        String sh = s0.substring(pos - maxLen+1, pos+1);
+        return sh;
+    }
+
+
+    private ListNode reverseList0(ListNode head) {
+        if(head == null || head.next == null) {
+            return head;
+        }
+
+
+        ListNode re = reverseList(head.next);
+
+        ListNode p1 = re;
+        while (p1.next != null) {
+            p1 = p1.next;
+        }
+
+        p1.next = head;
+        head.next = null;
+        return re;
+    }
 
     /**
      * 验证是否为回文串
@@ -602,24 +990,25 @@ public class Pratice {
      * @param list2
      * @return
      */
-    public ListNode merge(ListNode list1, ListNode list2) {
-
-        if (list1 == null) {
+    public ListNode Merge(ListNode list1,ListNode list2) {
+        if(list1 == null) {
             return list2;
         }
 
-        if (list2 == null) {
+        if(list2 == null) {
             return list1;
         }
 
-        if (list1.val < list2.val) {
-            ListNode mergedList = merge(list1.next, list2);
-            list1.next = mergedList;
+        if(list1.val < list2.val) {
+            ListNode tmp =  Merge(list1.next, list2);
+            list1.next = tmp;
             return list1;
         }
-        ListNode mm = merge(list1, list2.next);
-        list2.next = mm;
+        ListNode tmp =  Merge(list1, list2.next);
+        list2.next = tmp;
+
         return list2;
+
     }
 
     /**
@@ -837,6 +1226,37 @@ public class Pratice {
     }
 
     /**
+     * 一个数字在数组中出现的次数超过一半
+     * @param arr
+     * @return
+     */
+    private static int findNum(int[] arr) {
+        if(arr == null || arr.length == 0) {
+            return Integer.MAX_VALUE;
+        }
+
+        int res = arr[0];
+        int count = 1;
+        int len = arr.length;
+
+        for(int i = 1; i < len; i++) {
+            if(count == 0) {
+                res = arr[i];
+                count = 1;
+            }else
+            if(arr[i] == res) {
+                count++;
+            }else {
+                count --;
+            }
+
+        }
+
+        return res;
+
+    }
+
+    /**
      * 无序数组
      *
      * @param data
@@ -928,6 +1348,38 @@ public class Pratice {
 
         return null;
     }
+
+    //
+    public int longestSubstring(String str) {
+        char[] arr = str.toCharArray();
+        int[] s = new int[26];
+
+        for(int i = 0; i < 26; i++) {
+            s[i] = -1;
+        }
+
+        s[arr[0] - 'a'] = 0;
+        int size = arr.length;
+        int[] res = new int[size];
+        int max = res[0];
+
+        //hubaihu
+        for(int i = 1; i < size; i++ ){
+            int pos = s[arr[i] - 'a'];
+            int dis = i - pos;
+            if(pos == -1 || dis > res[i-1]) {
+                res[i] = res[i-1] + 1;
+            }else {
+                res[i] = dis;
+            }
+
+            s[arr[i] - 'a'] = i;
+            max = Math.max(max, res[i]);
+
+        }
+        return max;
+    }
+
 
 
     /**

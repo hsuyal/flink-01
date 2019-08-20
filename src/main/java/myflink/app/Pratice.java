@@ -1112,7 +1112,7 @@ public class Pratice {
             return -1;
         }
 
-        int tmp = array[0];
+        int tmp = array[start];
         while (start < end) {
             while (start < end && tmp <= array[end]) {
                 end--;

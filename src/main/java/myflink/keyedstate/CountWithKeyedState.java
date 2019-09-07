@@ -1,8 +1,10 @@
 package myflink.keyedstate;
 
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -43,11 +45,11 @@ public class CountWithKeyedState extends RichFlatMapFunction<Tuple2<Long,Long>,T
 
     @Override
     public void open(Configuration parameters) throws Exception {
-//        StateTtlConfig ttlConfig = StateTtlConfig
-//                .newBuilder(Time.seconds(1))
-//                .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
-//                .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
-//                .build();
+        StateTtlConfig ttlConfig = StateTtlConfig
+                .newBuilder(Time.seconds(1))
+                .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+                .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .build();
 
         /**
          * 注意这里仅仅用了状态，但是没有利用状态来容错
@@ -57,7 +59,7 @@ public class CountWithKeyedState extends RichFlatMapFunction<Tuple2<Long,Long>,T
                         "avgState",
                         TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {})
                 );
-//        descriptor.enableTimeToLive(ttlConfig);
+        descriptor.enableTimeToLive(ttlConfig);
 
         sum=getRuntimeContext().getState(descriptor);
     }
